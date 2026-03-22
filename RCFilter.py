@@ -7,14 +7,26 @@ from PySpice.Plot.BodeDiagram import bode_diagram
 from PySpice.Spice.Netlist import Circuit
 from PySpice.Unit import *
 
+# Test using subckt in this circuit (R as 'parallel-resistor from SubCircuitFactoryTest.py)
+from SubCircuitFactoryTest import ParallelResistor
+
+import os
+#os.environ["path"] += os.pathsep + r"C:\Python38\lib\site-packages\PySpice\Spice\NgSpice\Spice64_dll\dll-vs"
+
 logger = Logging.setup_logging()
 circuit = Circuit('Low-Pass RC Filter')
 
 circuit.SinusoidalVoltageSource('input', 'in', circuit.gnd, amplitude=1@u_V)
-R1 = circuit.R(1, 'in', 'out', 1@u_kΩ)
+#R1 = circuit.R(1, 'in', 'out', 1@u_kΩ)
+circuit.subcircuit(ParallelResistor(R1=2@u_kΩ,R2=2@u_kΩ))
+R1 = circuit.X('1', 'parallel_resistor', 'in', 'out')
 C1 = circuit.C(1, 'out', circuit.gnd, 1@u_uF)
+R1_val = 2@u_kΩ
+R2_val = 2@u_kΩ
+Req = R1_val * R2_val / (R1_val + R2_val)
 
-break_frequency = 1 / (2 * math.pi * float(R1.resistance * C1.capacitance))
+#break_frequency = 1 / (2 * math.pi * float(R1.resistance * C1.capacitance))
+break_frequency = 1 / (2 * math.pi * float(Req * C1.capacitance))
 print("Break frequency = {:.1f} Hz".format(break_frequency))
 print(str(circuit))
 
