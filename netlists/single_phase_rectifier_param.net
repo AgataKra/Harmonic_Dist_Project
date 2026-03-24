@@ -1,0 +1,12 @@
+D1 0 N001 D
+D2 N001 N002 D
+D3 0 N003 D
+D4 N003 N002 D
+C1 N002 0 4000u
+R1 N002 0 1k
+V1 N001 N003 SINE(0 {Vin} {Fin})
+.model D D
+.param Vin=20
+.param Fin=50
+.tran 2n 200m 0 200n
+.end

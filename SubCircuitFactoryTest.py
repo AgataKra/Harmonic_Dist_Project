@@ -6,8 +6,8 @@ from PySpice.Unit import *
 
 # Test of creating subckt with SubCircuitFactory
 class ParallelResistor(SubCircuitFactory):
-    NAME = 'parallel_resistor'
-    NODES = ('n1', 'n2')
+    __name__ = 'parallel_resistor'
+    __nodes__ = ('n1', 'n2')
     def __init__(self, R1=1@u_Ω, R2=2@u_Ω):
         super().__init__()
         r1 = self.R(1, 'n1', 'n2', R1)

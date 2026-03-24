@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="b72a14eb-22d8-436f-ac98-16583dc39b6b" name="Changes" comment="Testing Subcircuits and tkinter basic usage">
-      <change afterPath="$PROJECT_DIR$/SubCircuitFactoryTest.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TkinterTest.py" afterDir="false" />
+    <list default="true" id="b72a14eb-22d8-436f-ac98-16583dc39b6b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/LTSpiceNetlistParamTest.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/LTSpiceNetlistTest.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/netlists/single_phase_rectifier.net" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/Harmonic_Dist_Project.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Harmonic_Dist_Project.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RCFilter.py" beforeDir="false" afterPath="$PROJECT_DIR$/RCFilter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SubCircuitFactoryTest.py" beforeDir="false" afterPath="$PROJECT_DIR$/SubCircuitFactoryTest.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,18 +28,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "AgataKra"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;AgataKra&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/AgataKra/Harmonic_Dist_Project.git",
-    "accountId": "47dd7c79-6cf1-4af9-9bec-0827f2536f17"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/AgataKra/Harmonic_Dist_Project&quot;,
+    &quot;accountId&quot;: &quot;2ac376af-bae5-4623-a0ff-36eb51403dbd&quot;
   }
-}]]></component>
+}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -51,20 +55,24 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.LTSpiceNetlistParamTest.executor": "Run",
+    "Python.LTSpiceNetlistTest.executor": "Run",
     "Python.RCFilter.executor": "Run",
     "Python.SubCircuitFactoryTest.executor": "Run",
     "Python.TkinterTest.executor": "Run",
     "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "ai.playground.ignore.import.keys.banner.in.settings": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
     "to.speed.mode.migration.done": "true",
     "vue.rearranger.settings.migration": "true"
   }
@@ -85,20 +93,19 @@
       <option name="presentableId" value="Default" />
       <updated>1774094923260</updated>
       <workItem from="1774094924296" duration="60000" />
-      <workItem from="1774169615087" duration="7335000" />
+      <workItem from="1774348934523" duration="758000" />
+      <workItem from="1774349705608" duration="1548000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="Testing Subcircuits and tkinter basic usage" />
-    <option name="LAST_COMMIT_MESSAGE" value="Testing Subcircuits and tkinter basic usage" />
-  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Harmonic_Dist_Project$SubCircuitFactoryTest.coverage" NAME="SubCircuitFactoryTest Coverage Results" MODIFIED="1774172397335" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Harmonic_Dist_Project$TkinterTest.coverage" NAME="TkinterTest Coverage Results" MODIFIED="1774182044507" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Harmonic_Dist_Project$RCFilter.coverage" NAME="RCFilter Coverage Results" MODIFIED="1774173373215" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Harmonic_Dist_Project$TkinterTest.coverage" NAME="TkinterTest Coverage Results" MODIFIED="1774348900236" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Harmonic_Dist_Project$RCFilter.coverage" NAME="RCFilter Coverage Results" MODIFIED="1774349340587" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Harmonic_Dist_Project$LTSpiceNetlistParamTest.coverage" NAME="LTSpiceNetlistParamTest Coverage Results" MODIFIED="1774351333058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Harmonic_Dist_Project$LTSpiceNetlistTest.coverage" NAME="LTSpiceNetlistTest Coverage Results" MODIFIED="1774349670882" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Harmonic_Dist_Project$SubCircuitFactoryTest.coverage" NAME="SubCircuitFactoryTest Coverage Results" MODIFIED="1774348815730" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
