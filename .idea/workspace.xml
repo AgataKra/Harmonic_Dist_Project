@@ -4,14 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b72a14eb-22d8-436f-ac98-16583dc39b6b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/LTSpiceNetlistParamTest.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LTSpiceNetlistTest.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/netlists/single_phase_rectifier.net" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Harmonic_Dist_Project.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Harmonic_Dist_Project.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="b72a14eb-22d8-436f-ac98-16583dc39b6b" name="Changes" comment="Testing out launching and parametrizing LTSpice netlists in ngspice">
+      <change afterPath="$PROJECT_DIR$/SubcircuitNetlist_Test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SubCircuitFactoryTest.py" beforeDir="false" afterPath="$PROJECT_DIR$/SubCircuitFactoryTest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LTSpiceNetlistParamTest.py" beforeDir="false" afterPath="$PROJECT_DIR$/LTSpiceNetlistParamTest.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,6 +55,7 @@
     "Python.LTSpiceNetlistTest.executor": "Run",
     "Python.RCFilter.executor": "Run",
     "Python.SubCircuitFactoryTest.executor": "Run",
+    "Python.SubcircuitNetlist_Test.executor": "Run",
     "Python.TkinterTest.executor": "Run",
     "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -80,7 +77,6 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PY-253.31033.139" />
         <option value="bundled-python-sdk-2653e85de345-6d6dccd035ac-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.31033.139" />
       </set>
     </attachedChunks>
@@ -94,12 +90,27 @@
       <updated>1774094923260</updated>
       <workItem from="1774094924296" duration="60000" />
       <workItem from="1774348934523" duration="758000" />
-      <workItem from="1774349705608" duration="1548000" />
+      <workItem from="1774349705608" duration="1696000" />
+      <workItem from="1774376054917" duration="585000" />
+      <workItem from="1774973155131" duration="5000" />
     </task>
+    <task id="LOCAL-00001" summary="Testing out launching and parametrizing LTSpice netlists in ngspice">
+      <option name="closed" value="true" />
+      <created>1774351449139</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1774351449139</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Testing out launching and parametrizing LTSpice netlists in ngspice" />
+    <option name="LAST_COMMIT_MESSAGE" value="Testing out launching and parametrizing LTSpice netlists in ngspice" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Harmonic_Dist_Project$TkinterTest.coverage" NAME="TkinterTest Coverage Results" MODIFIED="1774348900236" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

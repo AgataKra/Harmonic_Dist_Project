@@ -31,10 +31,7 @@ for Vin in Vin_values:
 
     simulator = circuit.simulator(temperature=25, nominal_temperature=25)
 
-    analysis = simulator.transient(
-        step_time=1e-6,
-        end_time=100e-3
-    )
+    analysis = simulator.transient(step_time=1e-6, end_time=100e-3)
 
     # Plot each result
     plt.plot(analysis.time, analysis['N002'], label=f'Vin={Vin} V')
