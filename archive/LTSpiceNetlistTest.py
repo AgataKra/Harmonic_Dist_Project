@@ -3,7 +3,7 @@ from PySpice.Unit import *
 import matplotlib.pyplot as plt
 
 # Load netlist from file
-with open("./netlists/single_phase_rectifier.net") as f:
+with open("../netlists/single_phase_rectifier.net") as f:
     netlist = f.read()
 
 circuit = Circuit('Rectifier')

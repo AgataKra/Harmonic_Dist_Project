@@ -1,0 +1,25 @@
+V1 net_in1 0 SINE(0 {v_amp} {freq} 0 0 0)
+V2 net_in2 0 SINE(0 {v_amp} {freq} 0 0 120)
+V3 net_in3 0 SINE(0 {v_amp} {freq} 0 0 240)
+R1 N002 net_in1 {r_in}
+R2 N004 net_in2 {r_in}
+R3 N006 net_in3 {r_in}
+L1 N002 N003 {l_in}
+L2 N004 N005 {l_in}
+L3 N006 N007 {l_in}
+D1 N003 N001 D
+D2 N008 N003 D
+D3 N005 N001 D
+D4 N008 N005 D
+D5 N007 N001 D
+D6 N008 N007 D
+L4 N001 net_out {l_choke}
+L5 N008 N009 {l_choke}
+R4 net_out N009 {r_out}
+.model D D
+.param v_amp=400 freq=50 cycles=1000
+.param r_in=200m l_in=5m
+.param l_choke=20m
+.param r_out=1k
+.tran 0.1n 100m 0 1u
+.end

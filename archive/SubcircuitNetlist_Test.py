@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 circuit = Circuit('Rectifier Test')
 
 # Add your subcircuit definition
-with open("./netlists/rectifier_subc.sub", encoding="utf-16-le") as f:
+with open("../netlists/rectifier_subc.sub", encoding="utf-16-le") as f:
     circuit.raw_spice = f.read()
 circuit.raw_spice += "\n.model D D"
 print(circuit.raw_spice)

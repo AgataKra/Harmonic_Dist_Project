@@ -4,10 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b72a14eb-22d8-436f-ac98-16583dc39b6b" name="Changes" comment="Testing out launching and parametrizing LTSpice netlists in ngspice">
-      <change afterPath="$PROJECT_DIR$/SubcircuitNetlist_Test.py" afterDir="false" />
+    <list default="true" id="b72a14eb-22d8-436f-ac98-16583dc39b6b" name="Changes" comment="Testing out subcircuits from LTSpice">
+      <change afterPath="$PROJECT_DIR$/netlists/six_pulse_rectifier.net" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/spice_simulation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LTSpiceNetlistParamTest.py" beforeDir="false" afterPath="$PROJECT_DIR$/LTSpiceNetlistParamTest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LTSpiceNetlistTest.py" beforeDir="false" afterPath="$PROJECT_DIR$/archive/LTSpiceNetlistTest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RCFilter.py" beforeDir="false" afterPath="$PROJECT_DIR$/archive/RCFilter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SubCircuitFactoryTest.py" beforeDir="false" afterPath="$PROJECT_DIR$/archive/SubCircuitFactoryTest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SubcircuitNetlist_Test.py" beforeDir="false" afterPath="$PROJECT_DIR$/archive/SubcircuitNetlist_Test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TkinterTest.py" beforeDir="false" afterPath="$PROJECT_DIR$/archive/TkinterTest.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,6 +62,7 @@
     "Python.SubCircuitFactoryTest.executor": "Run",
     "Python.SubcircuitNetlist_Test.executor": "Run",
     "Python.TkinterTest.executor": "Run",
+    "Python.spice_simulation.executor": "Run",
     "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
@@ -74,6 +80,11 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/archive" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -102,7 +113,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774351449139</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Testing out subcircuits from LTSpice">
+      <option name="closed" value="true" />
+      <created>1774979514111</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1774979514111</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -110,7 +129,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Testing out launching and parametrizing LTSpice netlists in ngspice" />
-    <option name="LAST_COMMIT_MESSAGE" value="Testing out launching and parametrizing LTSpice netlists in ngspice" />
+    <MESSAGE value="Testing out subcircuits from LTSpice" />
+    <option name="LAST_COMMIT_MESSAGE" value="Testing out subcircuits from LTSpice" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Harmonic_Dist_Project$TkinterTest.coverage" NAME="TkinterTest Coverage Results" MODIFIED="1774348900236" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
