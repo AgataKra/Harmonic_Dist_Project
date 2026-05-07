@@ -2,54 +2,49 @@ from PySpice.Spice.Netlist import Circuit
 import matplotlib.pyplot as plt
 import re
 
-# --- Function to update netlist ---
-def update_netlist(file, v_amp, freq):
-    file = re.sub(r"\.param v_amp=.*", f".param v_amp={v_amp} freq={freq} cycles=1000", file)
-    file = re.sub(r"\.end", "", file)
-    return file
+class SimulationParameters:
+    def __init__(self):
+        self.v_amp = 400
+        self.freq = 50
+        self.cycles = 100
+        self.r_in = 0.2
+        self.l_in = 0.005
+        self.l_choke = 0.02
+        self.r_out = 1000
+        self.stop_time = 0.1
 
+class SimulationRunner:
+    def __init__(self, netlist_path="./netlists/six_pulse_rectifier.net"):
+        with open(netlist_path) as f:
+            self.base_netlist = f.read()
 
-# --- Load base netlist once ---
-with open("./netlists/six_pulse_rectifier.net") as f:
-    base_netlist = f.read()
+    def update_netlist(self, v_amp, freq):
+        net = re.sub(r"\.param v_amp=.*",
+                     f".param v_amp={v_amp} freq={freq} cycles=1000",
+                     self.base_netlist)
+        net = re.sub(r"\.end", "", net)
+        return net
 
-# --- Simulation parameters ---
-v_amp = [400, 420]
-freq = 50
-cycles = 100
-r_in = 0.2
-l_in = 0.005
-l_choke = 0.02
-r_out = 1000
-stop_time = 0.1
+    def run(self, params: SimulationParameters):
+        plt.figure()
 
-plt.figure()
+        for v_amp in params.v_amp:
+            netlist = self.update_netlist(v_amp, params.freq)
+            netlist += "\n.tran 10p 100m 0 1u\n.end\n"
 
-for v_amp in v_amp:
-    # Update netlist for this run
-    netlist = update_netlist(base_netlist, v_amp, freq)
-    netlist += "\n.tran 10p 100m 0 1u\n.end\n"
-    print(netlist)
-    # Create new circuit each time (important!)
-    circuit = Circuit(f'Rectifier v_amp={v_amp}')
-    circuit.raw_spice += netlist
+            circuit = Circuit(f'Rectifier v_amp={v_amp}')
+            circuit.raw_spice += netlist
 
-    simulator = circuit.simulator(temperature=25, nominal_temperature=25)
+            simulator = circuit.simulator(temperature=25, nominal_temperature=25)
+            analysis = simulator.transient(step_time=1e-9, end_time=100e-3)
 
-    analysis = simulator.transient(step_time=1e-6, end_time=100e-3)
+            plt.plot(analysis.time, analysis['net_out'], label=f'v_amp={v_amp} V')
 
-    # Plot each result
-    plt.plot(analysis.time, analysis['net_out'], label=f'v_amp={v_amp} V')
-
-# --- Plot formatting ---
-plt.xlabel('Time [s]')
-plt.ylabel('Voltage [V]')
-
-plt.xlim(0.06, 0.1)
-plt.ylim(0, 550)
-plt.title('Rectifier Output for Different v_amp')
-plt.legend()
-plt.grid()
-plt.show()
-
-print("Last netlist: \n" + str(circuit))
+        plt.xlabel('Time [s]')
+        plt.ylabel('Voltage [V]')
+        plt.xlim(0.06, 0.1)
+        plt.ylim(0, 1.5*max(params.v_amp))
+        plt.title('Rectifier Output for Different v_amp')
+        plt.legend()
+        plt.grid()
+        plt.show()
