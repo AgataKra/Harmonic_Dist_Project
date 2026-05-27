@@ -1,25 +1,36 @@
+* Six pulse, three phase rectifier with AC and DC passive filtering
 V1 net_in1 0 SINE(0 {v_amp} {freq} 0 0 0)
 V2 net_in2 0 SINE(0 {v_amp} {freq} 0 0 120)
 V3 net_in3 0 SINE(0 {v_amp} {freq} 0 0 240)
-R1 N002 net_in1 {r_in}
-R2 N004 net_in2 {r_in}
-R3 N006 net_in3 {r_in}
-L1 N002 N003 {l_in}
-L2 N004 N005 {l_in}
-L3 N006 N007 {l_in}
-D1 N003 N001 D
-D2 N008 N003 D
-D3 N005 N001 D
-D4 N008 N005 D
-D5 N007 N001 D
-D6 N008 N007 D
-L4 N001 net_out {l_choke}
-L5 N008 N009 {l_choke}
-R4 net_out N009 {r_out}
-.model D D
-.param v_amp=400 freq=50 cycles=1000
-.param r_in=200m l_in=5m
-.param l_choke=20m
-.param r_out=1k
-.tran 0.1n 100m 0 1u
+
+R1 net_in1 src_a {r_source}
+R2 net_in2 src_b {r_source}
+R3 net_in3 src_c {r_source}
+L1 src_a ac_a {l_ac}
+L2 src_b ac_b {l_ac}
+L3 src_c ac_c {l_ac}
+
+D1 ac_a dc_pos Drect
+D2 dc_neg ac_a Drect
+D3 ac_b dc_pos Drect
+D4 dc_neg ac_b Drect
+D5 ac_c dc_pos Drect
+D6 dc_neg ac_c Drect
+
+L4 dc_pos net_out {l_dc}
+L5 dc_neg net_dc_neg {l_dc}
+VLOAD net_out load_p 0
+RLOAD load_p net_dc_neg {r_load}
+CLOAD load_p net_dc_neg {c_load}
+
+.model Drect D(Is=1n Rs=10m N=1.7 Cjo=20p)
+.param v_phase_rms=230
+.param v_amp={sqrt(2)*v_phase_rms}
+.param freq=50
+.param r_source=0.2
+.param l_ac=5m
+.param l_dc=20m
+.param r_load=100
+.param c_load=1m
+.tran 10u 200m 0 10u
 .end
