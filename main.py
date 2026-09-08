@@ -1,6 +1,5 @@
 import tkinter as tk
-
-from window_manage import App
+from gui.app import App
 
 
 def main():

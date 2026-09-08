@@ -8,6 +8,7 @@ from PySpice.Spice.Netlist import Circuit
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 
+#This file handles SPICE simulation along with parsing the results.
 
 @dataclass
 class SimulationParameters:
@@ -19,8 +20,8 @@ class SimulationParameters:
     r_load: float = 100.0
     c_load: float = 0.001
     sim_mode: str = "auto"
-    stop_time: float = 0.2
-    step_time: float = 5e-5
+    stop_time: float = 0.1
+    step_time: float = 1e-5
 
     def validate(self):
         positive_fields = {
@@ -84,6 +85,7 @@ class SimulationRunner:
         net = re.sub(r"(?im)^\s*\.tran\s+.*$", "", net)
         net = re.sub(r"(?im)^\s*\.end\s*$", "", net).strip()
         param_lines = [
+
             f".param v_phase_rms={params.v_phase_rms}",
             ".param v_amp={sqrt(2)*v_phase_rms}",
             f".param freq={params.frequency}",
@@ -98,7 +100,6 @@ class SimulationRunner:
         return "\n".join([net, *param_lines, tran_line, ".end", ""])
 
     def run(self, params: SimulationParameters) -> SimulationResult:
-        params.validate()
         netlist = self.render_netlist(params)
         circuit = Circuit("Six pulse rectifier")
         circuit.raw_spice += netlist

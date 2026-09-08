@@ -12,6 +12,10 @@ from spice_simulation import SimulationParameters, SimulationRunner
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+#This file defines all the parameters for the app and the
+#simulation.
+#Also handles data gathered from the user through GUI and threading
+#of the simulation
 
 class App:
     def __init__(self, root):
@@ -49,7 +53,7 @@ class App:
             ("l_dc", "DC-side inductance l_dc [H]", self.default_params.l_dc),
             ("r_load", "Load resistance [Ohm]", self.default_params.r_load),
             ("c_load", "Load capacitance [F]", self.default_params.c_load),
-            ("step_time", "Simulation step [s]", self.default_params.step_time),
+            ("step_time", "Simulation maximum step [s]", self.default_params.step_time),
             ("stop_time", "Manual stop time [s]", self.default_params.stop_time),
         ]
 
