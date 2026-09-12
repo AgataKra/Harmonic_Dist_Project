@@ -4,13 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b72a14eb-22d8-436f-ac98-16583dc39b6b" name="Changes" comment="Base app functionalities done">
+    <list default="true" id="b72a14eb-22d8-436f-ac98-16583dc39b6b" name="Changes" comment="Some optimazation, removed doubled validation, changed default params for sim, merged init, window_manage and main files.">
+      <change afterPath="$PROJECT_DIR$/optimization.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui/__init__.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/gui/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui/results.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/results.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/spice_simulation.py" beforeDir="false" afterPath="$PROJECT_DIR$/spice_simulation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/window_manage.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,7 +17,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="27" />
+    <option name="cachedIndexableFilesCount" value="25" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -70,6 +69,7 @@
     "Python.SubcircuitNetlist_Test.executor": "Run",
     "Python.TkinterTest.executor": "Run",
     "Python.main.executor": "Run",
+    "Python.optimization.executor": "Run",
     "Python.spice_simulation.executor": "Run",
     "Python.window_manage.executor": "Run",
     "RunOnceActivity.MCP Project settings loaded": "true",
@@ -155,7 +155,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779907566377</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Some optimazation, removed doubled validation, changed default params for sim, merged init, window_manage and main files.">
+      <option name="closed" value="true" />
+      <created>1788895252382</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1788895252382</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -178,7 +186,8 @@
     <MESSAGE value="Tidying up, added a six pulse rectifier basic simulation" />
     <MESSAGE value="Basic app, added basic modification of parameters to app window" />
     <MESSAGE value="Base app functionalities done" />
-    <option name="LAST_COMMIT_MESSAGE" value="Base app functionalities done" />
+    <MESSAGE value="Some optimazation, removed doubled validation, changed default params for sim, merged init, window_manage and main files." />
+    <option name="LAST_COMMIT_MESSAGE" value="Some optimazation, removed doubled validation, changed default params for sim, merged init, window_manage and main files." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Harmonic_Dist_Project$TkinterTest.coverage" NAME="TkinterTest Coverage Results" MODIFIED="1774348900236" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

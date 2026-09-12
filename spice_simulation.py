@@ -8,7 +8,6 @@ from PySpice.Spice.Netlist import Circuit
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 
-#This file handles SPICE simulation along with parsing the results.
 
 @dataclass
 class SimulationParameters:
@@ -19,9 +18,8 @@ class SimulationParameters:
     l_dc: float = 0.02
     r_load: float = 100.0
     c_load: float = 0.001
-    sim_mode: str = "auto"
-    stop_time: float = 0.1
-    step_time: float = 1e-5
+    stop_time: float = 0.2
+    step_time: float = 1e-6
 
     def validate(self):
         positive_fields = {
@@ -32,26 +30,14 @@ class SimulationParameters:
             "DC-side inductance l_dc": self.l_dc,
             "Load resistance": self.r_load,
             "Load capacitance": self.c_load,
-            "Manual stop time": self.stop_time,
+            "Stop time": self.stop_time,
             "Simulation step": self.step_time,
         }
         for label, value in positive_fields.items():
             if value <= 0:
                 raise ValueError(f"{label} must be greater than zero.")
-        if self.sim_mode not in ("auto", "manual"):
-            raise ValueError("Simulation mode must be 'auto' or 'manual'.")
-        if self.step_time >= self.effective_stop_time():
+        if self.step_time >= self.stop_time:
             raise ValueError("Simulation step must be smaller than the stop time.")
-
-    def estimated_stop_time(self) -> float:
-        period = 1.0 / self.frequency
-        lc_settle = 8.0 * np.sqrt(max(self.l_dc * self.c_load, 0.0))
-        return max(12.0 * period, lc_settle, 0.12)
-
-    def effective_stop_time(self) -> float:
-        if self.sim_mode == "manual":
-            return self.stop_time
-        return self.estimated_stop_time()
 
 
 @dataclass
@@ -80,12 +66,19 @@ class SimulationRunner:
         self.netlist_path = Path(netlist_path) if netlist_path else PROJECT_ROOT / "netlists" / "six_pulse_rectifier.net"
         self.base_netlist = self.netlist_path.read_text(encoding="utf-8")
 
-    def render_netlist(self, params: SimulationParameters) -> str:
+    def render_netlist(self, params: SimulationParameters, fast_mode: bool = False) -> str:
         net = re.sub(r"(?im)^\s*\.param\s+.*$", "", self.base_netlist)
         net = re.sub(r"(?im)^\s*\.tran\s+.*$", "", net)
         net = re.sub(r"(?im)^\s*\.end\s*$", "", net).strip()
-        param_lines = [
 
+        options_line = (
+            ".options method=gear rtol=0.05 abstol=1e-3 vntol=1e-2 gmin=1e-7 cshunt=1e-15"
+            if fast_mode
+            else ".options method=gear rtol=0.01 abstol=1e-5 vntol=1e-3 cshunt=1e-15"
+        )
+
+        param_lines = [
+            options_line,
             f".param v_phase_rms={params.v_phase_rms}",
             ".param v_amp={sqrt(2)*v_phase_rms}",
             f".param freq={params.frequency}",
@@ -95,19 +88,18 @@ class SimulationRunner:
             f".param r_load={params.r_load}",
             f".param c_load={params.c_load}",
         ]
-        stop_time = params.effective_stop_time()
-        tran_line = f".tran {params.step_time} {stop_time} 0 {params.step_time}"
+        tran_line = f".tran {params.step_time} {params.stop_time} 0 {params.step_time}"
         return "\n".join([net, *param_lines, tran_line, ".end", ""])
 
-    def run(self, params: SimulationParameters) -> SimulationResult:
-        netlist = self.render_netlist(params)
+    def run(self, params: SimulationParameters, fast_mode: bool = False) -> SimulationResult:
+        netlist = self.render_netlist(params, fast_mode=fast_mode)
         circuit = Circuit("Six pulse rectifier")
         circuit.raw_spice += netlist
 
         simulator = circuit.simulator(temperature=25, nominal_temperature=25)
         analysis = simulator.transient(
             step_time=params.step_time,
-            end_time=params.effective_stop_time(),
+            end_time=params.stop_time,
         )
 
         time = self._vector_to_array(analysis.time)
@@ -141,8 +133,10 @@ class SimulationRunner:
         output_current_spectrum = calculate_harmonics(time, output_current, params.frequency)
         harmonics["Output voltage"] = output_voltage_spectrum
         harmonics["Output current"] = output_current_spectrum
-        thd["Output voltage"] = output_voltage_spectrum.thd_percent
-        thd["Output current"] = output_current_spectrum.thd_percent
+
+        # Correct calculation for DC output ripple percentage
+        thd["Output voltage"] = calculate_dc_ripple(time, output_voltage, params.frequency)
+        thd["Output current"] = calculate_dc_ripple(time, output_current, params.frequency)
 
         return SimulationResult(
             time=time,
@@ -167,6 +161,27 @@ class SimulationRunner:
     @staticmethod
     def _branch_current(analysis, branch_name: str) -> np.ndarray:
         return SimulationRunner._vector_to_array(analysis.branches[branch_name])
+
+
+def calculate_dc_ripple(time, values, base_frequency) -> float:
+    time = np.asarray(time, dtype=float)
+    values = np.asarray(values, dtype=float)
+    if len(time) < 4 or base_frequency <= 0:
+        return 0.0
+
+    period = 1.0 / base_frequency
+    start_time = max(time[0], time[-1] - 6.0 * period)
+    mask = time >= start_time
+    selected_values = values[mask] if np.any(mask) else values
+
+    v_avg = np.mean(selected_values)
+    if abs(v_avg) <= 1e-12:
+        return 0.0
+
+    v_max = np.max(selected_values)
+    v_min = np.min(selected_values)
+    ripple_percent = 100.0 * (v_max - v_min) / abs(v_avg)
+    return float(ripple_percent)
 
 
 def calculate_harmonics(time, values, base_frequency, max_order=30) -> HarmonicSpectrum:

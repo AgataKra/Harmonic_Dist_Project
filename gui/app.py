@@ -7,23 +7,20 @@ from tkinter import messagebox, ttk
 
 from gui.results import ResultsWindow, SweepResultsWindow
 from gui.sweep import SweepCase, SweepDialog
+from optimization import OptimizationRunner
 from spice_simulation import SimulationParameters, SimulationRunner
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-#This file defines all the parameters for the app and the
-#simulation.
-#Also handles data gathered from the user through GUI and threading
-#of the simulation
 
 class App:
     def __init__(self, root):
         self.root = root
         self.default_params = SimulationParameters()
         self.runner = SimulationRunner()
+        self.optimizer = OptimizationRunner(self.runner)
         self.entries = {}
-        self.sim_mode = tk.StringVar(value=self.default_params.sim_mode)
         self.status = tk.StringVar(value="Ready")
         self._init_window()
         self._build_ui()
@@ -54,7 +51,7 @@ class App:
             ("r_load", "Load resistance [Ohm]", self.default_params.r_load),
             ("c_load", "Load capacitance [F]", self.default_params.c_load),
             ("step_time", "Simulation maximum step [s]", self.default_params.step_time),
-            ("stop_time", "Manual stop time [s]", self.default_params.stop_time),
+            ("stop_time", "Stop time [s]", self.default_params.stop_time),
         ]
 
         for row, (name, label, value) in enumerate(fields):
@@ -63,39 +60,27 @@ class App:
             entry = ttk.Entry(form, width=18, textvariable=var)
             entry.grid(row=row, column=1, sticky="ew", padx=(8, 0), pady=4)
             self.entries[name] = var
-            if name == "stop_time":
-                self.stop_time_entry = entry
-
-        mode_frame = ttk.LabelFrame(form, text="Simulation length", padding=8)
-        mode_frame.grid(row=len(fields), column=0, columnspan=2, sticky="ew", pady=(12, 8))
-        ttk.Radiobutton(
-            mode_frame,
-            text="Automatic settling estimate",
-            variable=self.sim_mode,
-            value="auto",
-            command=self._update_stop_time_state,
-        ).grid(row=0, column=0, sticky="w")
-        ttk.Radiobutton(
-            mode_frame,
-            text="Manual stop time",
-            variable=self.sim_mode,
-            value="manual",
-            command=self._update_stop_time_state,
-        ).grid(row=1, column=0, sticky="w")
 
         buttons = ttk.Frame(form)
-        buttons.grid(row=len(fields) + 1, column=0, columnspan=2, sticky="ew", pady=(8, 0))
+        buttons.grid(row=len(fields), column=0, columnspan=2, sticky="ew", pady=(12, 0))
         buttons.columnconfigure(0, weight=1)
         buttons.columnconfigure(1, weight=1)
         buttons.columnconfigure(2, weight=1)
+        buttons.columnconfigure(3, weight=1)
+
         self.run_button = ttk.Button(buttons, text="Run simulation", command=self.run_sim)
-        self.run_button.grid(row=0, column=0, sticky="ew", padx=(0, 4))
+        self.run_button.grid(row=0, column=0, sticky="ew", padx=(0, 2))
+
         self.sweep_button = ttk.Button(buttons, text="Run sweep", command=self.open_sweep_dialog)
-        self.sweep_button.grid(row=0, column=1, sticky="ew", padx=4)
-        ttk.Button(buttons, text="Reset", command=self.reset_values).grid(row=0, column=2, sticky="ew", padx=(4, 0))
+        self.sweep_button.grid(row=0, column=1, sticky="ew", padx=2)
+
+        self.optimize_button = ttk.Button(buttons, text="Optimize L", command=self.run_optimization)
+        self.optimize_button.grid(row=0, column=2, sticky="ew", padx=2)
+
+        ttk.Button(buttons, text="Reset", command=self.reset_values).grid(row=0, column=3, sticky="ew", padx=(2, 0))
 
         ttk.Label(form, textvariable=self.status, foreground="#345").grid(
-            row=len(fields) + 2, column=0, columnspan=2, sticky="w", pady=(12, 0)
+            row=len(fields) + 1, column=0, columnspan=2, sticky="w", pady=(12, 0)
         )
 
         self.img_schematic = tk.PhotoImage(file=str(PROJECT_ROOT / "img" / "rectifier_diag_placeholder.png"))
@@ -106,18 +91,10 @@ class App:
             anchor="center",
         ).grid(row=1, column=0, sticky="ew", pady=(8, 0))
 
-        self._update_stop_time_state()
-
-    def _update_stop_time_state(self):
-        state = "normal" if self.sim_mode.get() == "manual" else "disabled"
-        self.stop_time_entry.configure(state=state)
-
     def reset_values(self):
         for name, var in self.entries.items():
             var.set(str(getattr(self.default_params, name)))
-        self.sim_mode.set(self.default_params.sim_mode)
         self.status.set("Ready")
-        self._update_stop_time_state()
 
     def _read_float(self, name, label, positive=True):
         raw_value = self.entries[name].get().strip()
@@ -138,8 +115,7 @@ class App:
             l_dc=self._read_float("l_dc", "DC-side inductance l_dc"),
             r_load=self._read_float("r_load", "Load resistance"),
             c_load=self._read_float("c_load", "Load capacitance"),
-            sim_mode=self.sim_mode.get(),
-            stop_time=self._read_float("stop_time", "Manual stop time"),
+            stop_time=self._read_float("stop_time", "Stop time"),
             step_time=self._read_float("step_time", "Simulation step"),
         )
         params.validate()
@@ -215,6 +191,50 @@ class App:
         self.status.set("Ready")
         SweepResultsWindow(self.root, sweep_label, results)
 
+    def run_optimization(self):
+        try:
+            params = self._read_params()
+        except ValueError as exc:
+            messagebox.showerror("Invalid parameter", str(exc))
+            self.status.set("Correct the highlighted input and run again.")
+            return
+
+        self._set_run_buttons_state("disabled")
+        self.status.set("Optimizing inductances...")
+        worker = threading.Thread(target=self._optimization_worker, args=(params,), daemon=True)
+        worker.start()
+
+    def _optimization_worker(self, params):
+        try:
+            def on_progress(step, l_ac, l_dc):
+                self.root.after(
+                    0,
+                    lambda: self.status.set(
+                        f"Optimization step {step}: L_ac={l_ac * 1e3:.2f}mH, L_dc={l_dc * 1e3:.2f}mH"
+                    ),
+                )
+
+            best_params, best_result, score = self.optimizer.optimize(params, progress_callback=on_progress)
+        except Exception as exc:
+            details = traceback.format_exc()
+            self.root.after(0, lambda: self._simulation_failed(exc, details))
+            return
+
+        self.root.after(0, lambda: self._optimization_finished(best_params, best_result, score))
+
+    def _optimization_finished(self, best_params, best_result, score):
+        self._set_run_buttons_state("normal")
+        self.entries["l_ac"].set(f"{best_params.l_ac:.6g}")
+        self.entries["l_dc"].set(f"{best_params.l_dc:.6g}")
+        self.status.set(f"Optimization done! Score: {score:.3f}")
+
+        messagebox.showinfo(
+            "Optimization complete",
+            f"Optimal values found:\nL_ac = {best_params.l_ac:.6f} H\nL_dc = {best_params.l_dc:.6f} H\n\nForm entries have been updated.",
+        )
+        ResultsWindow(self.root, best_result)
+
     def _set_run_buttons_state(self, state):
         self.run_button.configure(state=state)
         self.sweep_button.configure(state=state)
+        self.optimize_button.configure(state=state)

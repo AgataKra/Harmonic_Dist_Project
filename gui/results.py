@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
+import numpy as np
 from matplotlib.figure import Figure
 
 from gui.plotting import place_figure
@@ -106,12 +107,12 @@ class ResultsWindow:
 
     def _add_thd_table(self, notebook):
         frame = ttk.Frame(notebook, padding=12)
-        notebook.add(frame, text="THD values")
+        notebook.add(frame, text="THD / Ripple metrics")
         frame.columnconfigure(0, weight=1)
         tree = ttk.Treeview(frame, columns=("signal", "fundamental", "thd"), show="headings", height=12)
         tree.heading("signal", text="Signal")
-        tree.heading("fundamental", text="Fundamental RMS")
-        tree.heading("thd", text="THD [%]")
+        tree.heading("fundamental", text="Fundamental RMS / DC Avg")
+        tree.heading("thd", text="THD / Ripple [%]")
         tree.column("signal", width=260, anchor="w")
         tree.column("fundamental", width=180, anchor="e")
         tree.column("thd", width=120, anchor="e")
@@ -119,7 +120,12 @@ class ResultsWindow:
         frame.rowconfigure(0, weight=1)
 
         for name, spectrum in self.result.harmonics.items():
-            tree.insert("", "end", values=(name, f"{spectrum.fundamental_rms:.4g}", f"{spectrum.thd_percent:.3f}"))
+            metric_val = self.result.thd[name]
+            if "Output" in name:
+                fund_val = abs(float(np.mean(self.result.output_voltage if "voltage" in name else self.result.output_current)))
+            else:
+                fund_val = spectrum.fundamental_rms
+            tree.insert("", "end", values=(name, f"{fund_val:.4g}", f"{metric_val:.3f}"))
 
     def _add_harmonics_tab(self, notebook):
         frame = ttk.Frame(notebook, padding=8)
@@ -273,7 +279,7 @@ class SweepResultsWindow(ResultsWindow):
 
     def _add_sweep_thd_table(self, notebook):
         frame = ttk.Frame(notebook, padding=12)
-        notebook.add(frame, text="THD values")
+        notebook.add(frame, text="THD / Ripple values")
         frame.columnconfigure(0, weight=1)
         frame.rowconfigure(0, weight=1)
         tree = ttk.Treeview(
@@ -283,10 +289,10 @@ class SweepResultsWindow(ResultsWindow):
             height=12,
         )
         tree.heading("case", text=self.sweep_label)
-        tree.heading("input_voltage", text="Input U Phase A THD [%]")
-        tree.heading("input_current", text="Input I Phase A THD [%]")
-        tree.heading("output_voltage", text="Output U THD [%]")
-        tree.heading("output_current", text="Output I THD [%]")
+        tree.heading("input_voltage", text="Input U Ph A THD [%]")
+        tree.heading("input_current", text="Input I Ph A THD [%]")
+        tree.heading("output_voltage", text="Output U Ripple [%]")
+        tree.heading("output_current", text="Output I Ripple [%]")
         tree.column("case", width=240, anchor="w")
         for column in ("input_voltage", "input_current", "output_voltage", "output_current"):
             tree.column(column, width=170, anchor="e")
