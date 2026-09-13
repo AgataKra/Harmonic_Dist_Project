@@ -17,6 +17,7 @@ class OptimizationRunner:
     def evaluate_objective(self, l_vector: list[float], base_params: SimulationParameters) -> float:
         l_ac, l_dc = l_vector
 
+        # Hard penalty for non-physical zero or negative values
         if l_ac <= 1e-6 or l_dc <= 1e-6:
             return 1e6
 
@@ -35,7 +36,7 @@ class OptimizationRunner:
         except Exception:
             return 1e6
 
-        # Slice settled time between 0.20s and 0.26s
+        # Slice settled region between 0.20s and 0.26s
         t_mask = (result.time >= 0.20) & (result.time <= 0.26)
         if not np.any(t_mask) or np.sum(t_mask) < 4:
             return 1e6
@@ -44,26 +45,32 @@ class OptimizationRunner:
         settled_v_out = result.output_voltage[t_mask]
         settled_i_phase_a = result.input_currents["Phase A"][t_mask]
 
-        # AC Input Current THD
+        # 1. Input Current THD %
         harmonics_i_in = calculate_harmonics(settled_time, settled_i_phase_a, sim_params.frequency)
         thd_i_in = harmonics_i_in.thd_percent
 
-        # DC Output Voltage Ripple %
+        # 2. Output Voltage Ripple %
         ripple_v_out = calculate_dc_ripple(settled_time, settled_v_out, sim_params.frequency)
 
-        # Ideal 6-pulse target DC voltage drop penalty
-        v_dc_target = (3.0 * np.sqrt(6.0) / np.pi) * sim_params.v_phase_rms
+        # 3. Output DC Voltage Deviation Penalty (Deviation from Ideal 6-Pulse Output)
+        v_dc_ideal = (3.0 * np.sqrt(6.0) / np.pi) * sim_params.v_phase_rms
         v_dc_actual = float(np.mean(settled_v_out))
-        v_dc_penalty = ((v_dc_target - v_dc_actual) / v_dc_target) ** 2
 
-        # Reactance scale penalty
+        # Percentage difference from ideal DC output voltage
+        v_dc_deviation_percent = 100.0 * abs(v_dc_ideal - v_dc_actual) / v_dc_ideal
+
+        # 4. Inductance Reactance Cost Penalty
         x_ac = 2.0 * np.pi * sim_params.frequency * l_ac
         x_dc = 2.0 * np.pi * sim_params.frequency * l_dc
         inductance_cost = (x_ac / (sim_params.r_source + 1e-3)) + (x_dc / (sim_params.r_load + 1e-3))
 
-        # Well-balanced objective function (Ripple % is now on a similar 0-100 scale as THD %)
-        w1, w2, w3, w4 = 1.0, 1.0, 0.3, 0.05
-        score = (w1 * thd_i_in) + (w2 * ripple_v_out) + (w3 * v_dc_penalty) + (w4 * inductance_cost)
+        # Weight factors:
+        # w1 = Input THD weight
+        # w2 = DC Ripple weight
+        # w3 = DC Voltage Drop/Deviation weight
+        # w4 = Inductance scale penalty weight
+        w1, w2, w3, w4 = 1.0, 1.0, 1.5, 0.05
+        score = (w1 * thd_i_in) + (w2 * ripple_v_out) + (w3 * v_dc_deviation_percent) + (w4 * inductance_cost)
         return float(score)
 
     def optimize(self, base_params: SimulationParameters, progress_callback=None):

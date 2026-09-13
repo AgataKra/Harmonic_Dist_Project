@@ -134,9 +134,10 @@ class ResultsWindow:
         frame.rowconfigure(1, weight=1)
         frame.rowconfigure(2, weight=0)
 
-        signal_names = list(self.result.harmonics.keys())
+        # Filter signal dropdown to include only Input Current signals
+        signal_names = [name for name in self.result.harmonics.keys() if "Input current" in name]
         selected_signal = tk.StringVar(value=signal_names[0])
-        selector = ttk.Combobox(frame, textvariable=selected_signal, values=signal_names, state="readonly")
+        selector = ttk.Combobox(frame, textvariable=selected_signal, values=signal_names, state="readonly", width=28)
         selector.grid(row=0, column=0, sticky="w", pady=(0, 8))
 
         plot_frame = ttk.Frame(frame)
@@ -158,7 +159,7 @@ class ResultsWindow:
             height=6,
         )
         harmonic_table.heading("order", text="Harmonic order")
-        harmonic_table.heading("rms", text="RMS level [V or A]")
+        harmonic_table.heading("rms", text="RMS level [A]")
         harmonic_table.heading("percent", text="% of fundamental")
         harmonic_table.column("order", width=130, anchor="e")
         harmonic_table.column("rms", width=180, anchor="e")
@@ -174,7 +175,7 @@ class ResultsWindow:
             axis.bar(spectrum.orders, spectrum.magnitudes)
             axis.set_title(f"Harmonic levels: {selected_signal.get()}")
             axis.set_xlabel("Harmonic order")
-            axis.set_ylabel("RMS level [V or A]")
+            axis.set_ylabel("RMS level [A]")
             axis.set_xticks(spectrum.orders[::2])
             axis.grid(True, axis="y")
             fig.tight_layout()
@@ -321,12 +322,7 @@ class SweepResultsWindow(ResultsWindow):
         controls = ttk.Frame(frame)
         controls.grid(row=0, column=0, sticky="ew", pady=(0, 8))
         ttk.Label(controls, text="Signal").grid(row=0, column=0, sticky="w")
-        signal_names = [
-            "Input voltage Phase A",
-            "Input current Phase A",
-            "Output voltage",
-            "Output current",
-        ]
+        signal_names = ["Input current Phase A"]
         selected_signal = tk.StringVar(value=signal_names[0])
         selector = ttk.Combobox(controls, textvariable=selected_signal, values=signal_names, state="readonly", width=28)
         selector.grid(row=0, column=1, sticky="w", padx=(8, 0))
@@ -374,7 +370,7 @@ class SweepResultsWindow(ResultsWindow):
                 axis.plot(spectrum.orders, spectrum.magnitudes, marker="o", linewidth=1.5, label=case.label)
             axis.set_title(f"Harmonic levels: {signal}")
             axis.set_xlabel("Harmonic order")
-            axis.set_ylabel("RMS level [V or A]")
+            axis.set_ylabel("RMS level [A]")
             axis.set_xticks(self.sweep_cases[0].result.harmonics[signal].orders[::2])
             axis.grid(True)
             axis.legend()
