@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b72a14eb-22d8-436f-ac98-16583dc39b6b" name="Changes" comment="Added optimization file, changed calculation of voltage harmonics to ripple calculation, added search for optimal filters.">
+    <list default="true" id="b72a14eb-22d8-436f-ac98-16583dc39b6b" name="Changes" comment="Added ripple and deviation of voltage to optimazation, deleted graphs from results.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gui/results.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui/results.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optimization.py" beforeDir="false" afterPath="$PROJECT_DIR$/optimization.py" afterDir="false" />
@@ -169,7 +169,15 @@
       <option name="project" value="LOCAL" />
       <updated>1789227569724</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Added ripple and deviation of voltage to optimazation, deleted graphs from results.">
+      <option name="closed" value="true" />
+      <created>1789318465549</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1789318465549</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -194,7 +202,8 @@
     <MESSAGE value="Base app functionalities done" />
     <MESSAGE value="Some optimazation, removed doubled validation, changed default params for sim, merged init, window_manage and main files." />
     <MESSAGE value="Added optimization file, changed calculation of voltage harmonics to ripple calculation, added search for optimal filters." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added optimization file, changed calculation of voltage harmonics to ripple calculation, added search for optimal filters." />
+    <MESSAGE value="Added ripple and deviation of voltage to optimazation, deleted graphs from results." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added ripple and deviation of voltage to optimazation, deleted graphs from results." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Harmonic_Dist_Project$TkinterTest.coverage" NAME="TkinterTest Coverage Results" MODIFIED="1774348900236" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
