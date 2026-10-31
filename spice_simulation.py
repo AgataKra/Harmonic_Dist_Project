@@ -71,10 +71,12 @@ class SimulationRunner:
         net = re.sub(r"(?im)^\s*\.tran\s+.*$", "", net)
         net = re.sub(r"(?im)^\s*\.end\s*$", "", net).strip()
 
+        # Opcje zapobiegające brakowi zbieżności (convergence failure) w ngspice
+
         options_line = (
-            ".options method=gear rtol=0.05 abstol=1e-3 vntol=1e-2 gmin=1e-7 cshunt=1e-15"
+            ".options method=gear rtol=0.05 abstol=1e-3 vntol=1e-2 gmin=1e-7 cshunt=1e-15 chgtol=1e-12 ITL4=100 TRTOL=7 MAXORD=2"
             if fast_mode
-            else ".options method=gear rtol=0.01 abstol=1e-5 vntol=1e-3 cshunt=1e-15"
+            else ".options method=gear rtol=0.02 abstol=1e-4 vntol=1e-3 gmin=1e-7 cshunt=1e-15 chgtol=1e-12 ITL4=100 TRTOL=7 MAXORD=2"
         )
 
         param_lines = [
@@ -97,10 +99,16 @@ class SimulationRunner:
         circuit.raw_spice += netlist
 
         simulator = circuit.simulator(temperature=25, nominal_temperature=25)
-        analysis = simulator.transient(
-            step_time=params.step_time,
-            end_time=params.stop_time,
-        )
+        try:
+            analysis = simulator.transient(
+                step_time=params.step_time,
+                end_time=params.stop_time,
+            )
+        except Exception:
+            # Fallback pass with fast_mode solver flags if normal precision pass fails to converge
+            if not fast_mode:
+                return self.run(params, fast_mode=True)
+            raise
 
         time = self._vector_to_array(analysis.time)
         input_voltages = {
@@ -134,7 +142,6 @@ class SimulationRunner:
         harmonics["Output voltage"] = output_voltage_spectrum
         harmonics["Output current"] = output_current_spectrum
 
-        # Correct calculation for DC output ripple percentage
         thd["Output voltage"] = calculate_dc_ripple(time, output_voltage, params.frequency)
         thd["Output current"] = calculate_dc_ripple(time, output_current, params.frequency)
 

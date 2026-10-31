@@ -147,8 +147,9 @@ class App:
         try:
             result = self.runner.run(params)
         except Exception as exc:
+            err_msg = str(exc)
             details = traceback.format_exc()
-            self.root.after(0, lambda: self._simulation_failed(exc, details))
+            self.root.after(0, lambda e=err_msg, d=details: self._simulation_failed(e, d))
             return
         self.root.after(0, lambda: self._simulation_finished(result))
 
@@ -169,10 +170,12 @@ class App:
                 params = replace(base_params, **{sweep_parameter: value})
                 result = self.runner.run(params)
                 results.append(SweepCase(value=value, label=f"{sweep_label}={value:g}", result=result))
-                self.root.after(0, lambda done=index, total=len(values): self.status.set(f"Sweep running {done}/{total}..."))
+                self.root.after(0, lambda done=index, total=len(values): self.status.set(
+                    f"Sweep running {done}/{total}..."))
         except Exception as exc:
+            err_msg = str(exc)
             details = traceback.format_exc()
-            self.root.after(0, lambda: self._simulation_failed(exc, details))
+            self.root.after(0, lambda e=err_msg, d=details: self._simulation_failed(e, d))
             return
         self.root.after(0, lambda: self._sweep_finished(sweep_label, results))
 
@@ -209,15 +212,16 @@ class App:
             def on_progress(step, l_ac, l_dc):
                 self.root.after(
                     0,
-                    lambda: self.status.set(
-                        f"Optimization step {step}: L_ac={l_ac * 1e3:.2f}mH, L_dc={l_dc * 1e3:.2f}mH"
+                    lambda s=step, ac=l_ac, dc=l_dc: self.status.set(
+                        f"Optimization step {s}: L_ac={ac * 1e3:.2f}mH, L_dc={dc * 1e3:.2f}mH"
                     ),
                 )
 
             best_params, best_result, score = self.optimizer.optimize(params, progress_callback=on_progress)
         except Exception as exc:
+            err_msg = str(exc)
             details = traceback.format_exc()
-            self.root.after(0, lambda: self._simulation_failed(exc, details))
+            self.root.after(0, lambda e=err_msg, d=details: self._simulation_failed(e, d))
             return
 
         self.root.after(0, lambda: self._optimization_finished(best_params, best_result, score))
