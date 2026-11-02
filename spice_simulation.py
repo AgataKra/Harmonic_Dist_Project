@@ -57,12 +57,6 @@ class SimulationResult:
     output_current: np.ndarray
     harmonics: dict
     thd: dict
-    v_dc_ideal: float
-    v_dc_actual: float
-    v_drop_lac_v: float
-    v_drop_lac_percent: float
-    v_drop_ldc_v: float
-    v_drop_ldc_percent: float
     netlist: str
     params: SimulationParameters
 
@@ -78,9 +72,9 @@ class SimulationRunner:
         net = re.sub(r"(?im)^\s*\.end\s*$", "", net).strip()
 
         options_line = (
-            ".options method=gear rtol=0.05 abstol=1e-3 vntol=1e-2 gmin=1e-7 cshunt=1e-15 chgtol=1e-12 ITL4=100 TRTOL=7 MAXORD=2"
+            ".options method=gear rtol=0.05 abstol=1e-3 vntol=1e-2 gmin=1e-7 cshunt=1e-15"
             if fast_mode
-            else ".options method=gear rtol=0.02 abstol=1e-4 vntol=1e-3 gmin=1e-7 cshunt=1e-15 chgtol=1e-12 ITL4=100 TRTOL=7 MAXORD=2"
+            else ".options method=gear rtol=0.01 abstol=1e-5 vntol=1e-3 cshunt=1e-15"
         )
 
         param_lines = [
@@ -103,16 +97,10 @@ class SimulationRunner:
         circuit.raw_spice += netlist
 
         simulator = circuit.simulator(temperature=25, nominal_temperature=25)
-
-        try:
-            analysis = simulator.transient(
-                step_time=params.step_time,
-                end_time=params.stop_time,
-            )
-        except Exception:
-            if not fast_mode:
-                return self.run(params, fast_mode=True)
-            raise
+        analysis = simulator.transient(
+            step_time=params.step_time,
+            end_time=params.stop_time,
+        )
 
         time = self._vector_to_array(analysis.time)
         input_voltages = {
@@ -128,7 +116,6 @@ class SimulationRunner:
         output_voltage = self._node_voltage(analysis, "load_p") - self._node_voltage(analysis, "net_dc_neg")
         output_current = self._branch_current(analysis, "vload")
 
-        # Harmonic Analysis
         harmonics = {}
         thd = {}
         for name, values in input_voltages.items():
@@ -147,25 +134,9 @@ class SimulationRunner:
         harmonics["Output voltage"] = output_voltage_spectrum
         harmonics["Output current"] = output_current_spectrum
 
+        # Correct calculation for DC output ripple percentage
         thd["Output voltage"] = calculate_dc_ripple(time, output_voltage, params.frequency)
         thd["Output current"] = calculate_dc_ripple(time, output_current, params.frequency)
-
-        # Voltage Drop Analysis
-        period = 1.0 / params.frequency
-        t_mask = time >= max(time[0], time[-1] - 6.0 * period)
-        settled_v_out = output_voltage[t_mask] if np.any(t_mask) else output_voltage
-        settled_i_out = output_current[t_mask] if np.any(t_mask) else output_current
-
-        v_dc_ideal = (3.0 * np.sqrt(6.0) / np.pi) * params.v_phase_rms
-        v_dc_actual = float(np.mean(settled_v_out))
-        i_dc_avg = float(np.mean(settled_i_out))
-
-        v_drop_lac_v = (3.0 / np.pi) * (2.0 * np.pi * params.frequency) * params.l_ac * i_dc_avg
-        v_drop_lac_percent = 100.0 * (v_drop_lac_v / v_dc_ideal)
-
-        v_no_load_dc = v_dc_ideal - v_drop_lac_v
-        v_drop_ldc_v = max(0.0, v_no_load_dc - v_dc_actual)
-        v_drop_ldc_percent = 100.0 * (v_drop_ldc_v / v_dc_ideal)
 
         return SimulationResult(
             time=time,
@@ -175,12 +146,6 @@ class SimulationRunner:
             output_current=output_current,
             harmonics=harmonics,
             thd=thd,
-            v_dc_ideal=v_dc_ideal,
-            v_dc_actual=v_dc_actual,
-            v_drop_lac_v=v_drop_lac_v,
-            v_drop_lac_percent=v_drop_lac_percent,
-            v_drop_ldc_v=v_drop_ldc_v,
-            v_drop_ldc_percent=v_drop_ldc_percent,
             netlist=netlist,
             params=params,
         )
