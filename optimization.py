@@ -23,16 +23,10 @@ class OptimizationStepData:
     v_drop_ldc_v: float
     v_drop_ldc_percent: float
     v_dc_dev_percent: float
-    # Settled steady-state window data
     time: np.ndarray
     i_phase_a: np.ndarray
     v_out: np.ndarray
     i_out: np.ndarray
-    # Full transient waveform data (for startup view)
-    full_time: np.ndarray
-    full_i_phase_a: np.ndarray
-    full_v_out: np.ndarray
-    full_i_out: np.ndarray
 
 
 class OptimizationRunner:
@@ -111,10 +105,6 @@ class OptimizationRunner:
                     i_phase_a=settled_i_phase_a,
                     v_out=settled_v_out,
                     i_out=settled_i_out,
-                    full_time=result.time,
-                    full_i_phase_a=result.input_currents["Phase A"],
-                    full_v_out=result.output_voltage,
-                    full_i_out=result.output_current,
                 )
             )
 

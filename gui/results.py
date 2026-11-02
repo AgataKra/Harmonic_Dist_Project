@@ -312,7 +312,7 @@ class ResultsWindow:
 
         ttk.Radiobutton(
             view_mode_frame,
-            text="Beginning Waveforms (Transient startup: 0 ms - 120 ms)",
+            text="Beginning Waveforms (Transient startup: 0 ms - 60 ms)",
             value="beginning",
             variable=view_mode_var,
             command=lambda: redraw(),
@@ -353,9 +353,9 @@ class ResultsWindow:
                     v_out = step.v_out
                     i_out = step.i_out
                 else:
-                    # Filter for beginning transient window (0 ms to 120 ms)
+                    # Filter for beginning transient window (0 ms to 60 ms)
                     t_full_ms = step.full_time * 1000.0
-                    mask = t_full_ms <= 120.0
+                    mask = t_full_ms <= 60.0
                     if not np.any(mask):
                         mask = np.ones_like(t_full_ms, dtype=bool)
                     t_ms = t_full_ms[mask]
