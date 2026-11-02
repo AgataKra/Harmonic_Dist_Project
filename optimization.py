@@ -18,11 +18,21 @@ class OptimizationStepData:
     score: float
     thd_i_in: float
     ripple_v_out: float
+    v_drop_lac_v: float
+    v_drop_lac_percent: float
+    v_drop_ldc_v: float
+    v_drop_ldc_percent: float
     v_dc_dev_percent: float
+    # Settled steady-state window data
     time: np.ndarray
     i_phase_a: np.ndarray
     v_out: np.ndarray
     i_out: np.ndarray
+    # Full transient waveform data (for startup view)
+    full_time: np.ndarray
+    full_i_phase_a: np.ndarray
+    full_v_out: np.ndarray
+    full_i_out: np.ndarray
 
 
 class OptimizationRunner:
@@ -33,6 +43,7 @@ class OptimizationRunner:
         self,
         l_vector: list[float],
         base_params: SimulationParameters,
+        limit_v_drop: bool = False,
         history: list[OptimizationStepData] | None = None,
     ) -> float:
         l_ac, l_dc = l_vector
@@ -63,22 +74,23 @@ class OptimizationRunner:
         settled_i_phase_a = result.input_currents["Phase A"][t_mask]
         settled_i_out = result.output_current[t_mask]
 
-        # 1. Primary Metrics
         harmonics_i_in = calculate_harmonics(settled_time, settled_i_phase_a, sim_params.frequency)
         thd_i_in = harmonics_i_in.thd_percent
         ripple_v_out = calculate_dc_ripple(settled_time, settled_v_out, sim_params.frequency)
 
-        # 2. DC Voltage Drop Penalty
-        v_dc_ideal = (3.0 * np.sqrt(6.0) / np.pi) * sim_params.v_phase_rms
-        v_dc_actual = float(np.mean(settled_v_out))
+        v_dc_ideal = result.v_dc_ideal
+        v_dc_actual = result.v_dc_actual
         v_dc_dev_percent = 100.0 * abs(v_dc_ideal - v_dc_actual) / v_dc_ideal
 
-        # 3. Component Penalty (Scaled appropriately so THD/Ripple optimization dominates)
-        inductance_cost = (l_ac * 100.0) + (l_dc * 10.0)
+        total_drop_percent = result.v_drop_lac_percent + result.v_drop_ldc_percent
 
-        # Re-balanced Weights
-        w1, w2, w3, w4 = 2.0, 1.0, 0.1, 0.001
+        inductance_cost = (l_ac * 100.0) + (l_dc * 10.0)
+        w1, w2, w3, w4 = 2.0, 2.0, 1.0, 0.001
         score = (w1 * thd_i_in) + (w2 * ripple_v_out) + (w3 * v_dc_dev_percent) + (w4 * inductance_cost)
+
+        if limit_v_drop and total_drop_percent > 3.0:
+            excess_drop = total_drop_percent - 3.0
+            score += 100.0 * (excess_drop ** 2) + 50.0 * excess_drop
 
         if history is not None:
             step_num = len(history) + 1
@@ -90,17 +102,30 @@ class OptimizationRunner:
                     score=float(score),
                     thd_i_in=float(thd_i_in),
                     ripple_v_out=float(ripple_v_out),
+                    v_drop_lac_v=float(result.v_drop_lac_v),
+                    v_drop_lac_percent=float(result.v_drop_lac_percent),
+                    v_drop_ldc_v=float(result.v_drop_ldc_v),
+                    v_drop_ldc_percent=float(result.v_drop_ldc_percent),
                     v_dc_dev_percent=float(v_dc_dev_percent),
                     time=settled_time,
                     i_phase_a=settled_i_phase_a,
                     v_out=settled_v_out,
                     i_out=settled_i_out,
+                    full_time=result.time,
+                    full_i_phase_a=result.input_currents["Phase A"],
+                    full_v_out=result.output_voltage,
+                    full_i_out=result.output_current,
                 )
             )
 
         return float(score)
 
-    def optimize(self, base_params: SimulationParameters, progress_callback=None):
+    def optimize(
+        self,
+        base_params: SimulationParameters,
+        limit_v_drop: bool = False,
+        progress_callback=None
+    ):
         initial_guess = [base_params.l_ac, base_params.l_dc]
         min_l = 1e-4
         max_lac = 0.05 * (50.0 / base_params.frequency)
@@ -116,16 +141,21 @@ class OptimizationRunner:
         res = minimize(
             self.evaluate_objective,
             x0=initial_guess,
-            args=(base_params, history),
+            args=(base_params, limit_v_drop, history),
             method="Nelder-Mead",
             bounds=bounds,
             callback=callback,
-            options={"maxiter": 20, "xatol": 5e-4, "fatol": 5e-2},
+            options={"maxiter": 25, "xatol": 5e-4, "fatol": 5e-2},
         )
 
         best_l_ac, best_l_dc = res.x
-        best_params = replace(base_params, l_ac=best_l_ac, l_dc=best_l_dc)
-        best_result = self.runner.run(best_params, fast_mode=False)
+        safe_step_time = max(base_params.step_time, 5e-6)
+        best_params = replace(base_params, l_ac=best_l_ac, l_dc=best_l_dc, step_time=safe_step_time)
+
+        try:
+            best_result = self.runner.run(best_params, fast_mode=False)
+        except Exception:
+            best_result = self.runner.run(best_params, fast_mode=True)
 
         best_result.opt_history = history
         return best_params, best_result, res.fun
