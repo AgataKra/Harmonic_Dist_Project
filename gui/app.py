@@ -1,18 +1,27 @@
+from pathlib import Path
 import threading
 import tkinter as tk
 from tkinter import messagebox, ttk
 import traceback
 
+from PIL import Image, ImageTk
+HAS_PIL = True
+
 from optimization import OptimizationRunner
 from spice_simulation import SimulationParameters, SimulationRunner
 from gui.results import ResultsWindow, SweepResultsWindow
+
+# Define path to the assets directory
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+IMAGE_PATH = PROJECT_ROOT / "img" / "rectifier_diag.png"
 
 
 class Application:
     def __init__(self, root):
         self.root = root
         self.root.title("Harmonic distortion simulator")
-        self.root.minsize(1050, 720)
+        # Compact vertical bounds (~1.5x image height of 310px = ~465-490px total height)
+        self.root.minsize(1470, 735)
 
         self.runner = SimulationRunner()
         self.optimizer = OptimizationRunner(self.runner)
@@ -38,13 +47,38 @@ class Application:
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
 
-        main_frame = ttk.Frame(self.root, padding=12)
+        main_frame = ttk.Frame(self.root, padding=8)
         main_frame.grid(row=0, column=0, sticky="nsew")
         main_frame.columnconfigure(1, weight=1)
         main_frame.rowconfigure(0, weight=1)
 
-        form_frame = ttk.LabelFrame(main_frame, text="Simulation parameters", padding=12)
-        form_frame.grid(row=0, column=0, sticky="nw", padx=(0, 12))
+        # Left Column: Parameter Form (sticky="w" centers it vertically on the left)
+        form_frame = ttk.LabelFrame(main_frame, text="Simulation parameters", padding=10)
+        form_frame.grid(row=0, column=0, sticky="w", padx=(0, 10))
+
+        # Right Column: Diagram Image (no sticky centers it vertically and horizontally in its cell)
+        if IMAGE_PATH.exists() and HAS_PIL:
+            try:
+                img = Image.open(IMAGE_PATH)
+                img = img.resize((675, 465), Image.Resampling.LANCZOS)
+                self.diagram_img = ImageTk.PhotoImage(img)
+
+                diagram_label = ttk.Label(main_frame, image=self.diagram_img)
+                diagram_label.grid(row=0, column=1, padx=(10, 0))
+            except Exception as e:
+                self._render_image_placeholder(main_frame, f"Failed to load image: {e}")
+        elif IMAGE_PATH.exists() and not HAS_PIL:
+            try:
+                self.diagram_img = tk.PhotoImage(file=str(IMAGE_PATH))
+                diagram_label = ttk.Label(main_frame, image=self.diagram_img)
+                diagram_label.grid(row=0, column=1, padx=(10, 0))
+            except Exception:
+                self._render_image_placeholder(main_frame, "Pillow library missing (pip install pillow)")
+        else:
+            self._render_image_placeholder(
+                main_frame,
+                f"Schematic image not found.\nPlace 'rectifier_diag.png' in:\n{PROJECT_ROOT / 'img'}"
+            )
 
         labels = [
             ("Phase voltage RMS [V]", "v_phase_rms"),
@@ -59,26 +93,32 @@ class Application:
         ]
 
         for row, (label_text, var_key) in enumerate(labels):
-            ttk.Label(form_frame, text=label_text).grid(row=row, column=0, sticky="w", pady=3)
+            ttk.Label(form_frame, text=label_text).grid(row=row, column=0, sticky="w", pady=2)
             entry = ttk.Entry(form_frame, textvariable=self.param_vars[var_key], width=18)
-            entry.grid(row=row, column=1, sticky="e", pady=3, padx=(8, 0))
+            entry.grid(row=row, column=1, sticky="e", pady=2, padx=(8, 0))
 
         btn_frame = ttk.Frame(form_frame)
-        btn_frame.grid(row=len(labels), column=0, columnspan=2, sticky="ew", pady=(12, 0))
+        btn_frame.grid(row=len(labels), column=0, columnspan=2, sticky="ew", pady=(8, 0))
 
-        ttk.Button(btn_frame, text="Run simulation", command=self._on_run_clicked).grid(row=0, column=0, padx=(0, 4))
-        ttk.Button(btn_frame, text="Run sweep", command=self._on_sweep_clicked).grid(row=0, column=1, padx=4)
-        ttk.Button(btn_frame, text="Optimize L", command=self._on_optimize_clicked).grid(row=0, column=2, padx=4)
-        ttk.Button(btn_frame, text="Reset", command=self._reset_defaults).grid(row=0, column=3, padx=(4, 0))
+        ttk.Button(btn_frame, text="Run simulation", command=self._on_run_clicked).grid(row=0, column=0, padx=(0, 2))
+        ttk.Button(btn_frame, text="Run sweep", command=self._on_sweep_clicked).grid(row=0, column=1, padx=2)
+        ttk.Button(btn_frame, text="Optimize L", command=self._on_optimize_clicked).grid(row=0, column=2, padx=2)
+        ttk.Button(btn_frame, text="Reset", command=self._reset_defaults).grid(row=0, column=3, padx=(2, 0))
 
         ttk.Checkbutton(
             form_frame,
             text="Limit L_ac + L_dc voltage drop <= 3%",
             variable=self.limit_v_drop_var,
-        ).grid(row=len(labels) + 1, column=0, columnspan=2, sticky="w", pady=(8, 0))
+        ).grid(row=len(labels) + 1, column=0, columnspan=2, sticky="w", pady=(6, 0))
 
         status_bar = ttk.Label(main_frame, textvariable=self.status, relief="sunken", anchor="w", padding=4)
-        status_bar.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(8, 0))
+        status_bar.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(6, 0))
+
+    @staticmethod
+    def _render_image_placeholder(parent, message: str):
+        placeholder = ttk.LabelFrame(parent, text="Circuit Schematic", padding=12)
+        placeholder.grid(row=0, column=1, padx=(10, 0))
+        ttk.Label(placeholder, text=message, justify="center", foreground="gray").pack(expand=True, fill="both")
 
     def _get_parameters(self) -> SimulationParameters | None:
         try:
@@ -210,3 +250,6 @@ class Application:
     def _simulation_failed(self, exc_str, details):
         self.status.set("Simulation failed.")
         messagebox.showerror("Simulation Failed", f"{exc_str}\n\nDetails:\n{details}")
+
+
+App = Application
